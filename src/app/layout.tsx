@@ -2,8 +2,8 @@ import './globals.css'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'The Mind Studio | Client Portal — Telemed Platform',
-  description: 'Your private space for healing. Complete intake, schedule sessions, track mood, and access wellness resources through The Mind Studio telehealth platform.',
+  title: 'The Mind Studio | Portal — Client · Therapist · Operations',
+  description: 'Your private healing space. Complete intake, schedule sessions, track mood, access resources, and connect with your care team through The Mind Studio platform.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
