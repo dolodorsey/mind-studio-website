@@ -84,6 +84,18 @@ const PORTALS = {
   ]},
 };
 
+// ═══ MOBILE HOOK ═══
+function useMobile(breakpoint = 768) {
+  const [mobile, setMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < breakpoint : false);
+  useEffect(() => {
+    const check = () => setMobile(window.innerWidth < breakpoint);
+    window.addEventListener('resize', check);
+    check();
+    return () => window.removeEventListener('resize', check);
+  }, [breakpoint]);
+  return mobile;
+}
+
 // ═══ HIPAA Session Timer ═══
 function useSessionTimeout(minutes = 15) {
   const [expired, setExpired] = useState(false);
@@ -119,10 +131,12 @@ export default function MindStudioPortal() {
   const [animKey, setAnimKey] = useState(0);
   const [sessionExpired, resetSession] = useSessionTimeout(15);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobile = useMobile();
 
   const notify = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3500); };
-  const go = (s) => { setAnimKey(k => k + 1); setSection(s); };
-  const switchPortal = (p) => { setPortal(p); setSection(PORTALS[p].sections[0].id); setAnimKey(k => k + 1); };
+  const go = (s) => { setAnimKey(k => k + 1); setSection(s); setMobileMenuOpen(false); };
+  const switchPortal = (p) => { setPortal(p); setSection(PORTALS[p].sections[0].id); setAnimKey(k => k + 1); setMobileMenuOpen(false); };
   const P = PORTALS[portal];
 
   // ═══ HIPAA SESSION TIMEOUT SCREEN ═══
@@ -144,29 +158,100 @@ export default function MindStudioPortal() {
       <link href={FONTS} rel="stylesheet" />
       <style>{`
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:${C.sage};color:${C.body};font-family:'Lato',sans-serif}
+        body{background:${C.sage};color:${C.body};font-family:'Lato',sans-serif;overflow-x:hidden}
         ::selection{background:${C.teal}20;color:${C.teal}}
         .pf{font-family:'Playfair Display',serif}
-        input,textarea,select{font-family:'Lato',sans-serif}
+        input,textarea,select{font-family:'Lato',sans-serif;font-size:16px}
         @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
         @keyframes slideRight{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
         @keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
-        @keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         .anim-up{animation:fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both}
         .anim-slide{animation:slideRight 0.5s cubic-bezier(0.16,1,0.3,1) both}
         .anim-scale{animation:scaleIn 0.5s cubic-bezier(0.16,1,0.3,1) both}
         .sb::-webkit-scrollbar{width:4px}.sb::-webkit-scrollbar-track{background:transparent}.sb::-webkit-scrollbar-thumb{background:${C.sageAccent};border-radius:4px}
-        button{transition:all 0.25s ease}
-        button:hover{transform:translateY(-1px)}
+        button{transition:all 0.25s ease;-webkit-tap-highlight-color:transparent}
+        
+        /* ═══ MOBILE RESPONSIVE ═══ */
+        @media(max-width:768px){
+          .desktop-sidebar{display:none !important}
+          .mobile-bottom-nav{display:flex !important}
+          .mobile-menu-overlay{display:block !important}
+          .main-content{padding:16px 16px 100px !important}
+          .main-content .max-w{max-width:100% !important}
+          .top-bar{padding:12px 16px !important}
+          .stat-grid-4{grid-template-columns:1fr 1fr !important}
+          .stat-grid-3{grid-template-columns:1fr !important}
+          .card-grid-3{grid-template-columns:1fr !important}
+          .card-grid-2{grid-template-columns:1fr !important}
+          .form-grid-2{grid-template-columns:1fr !important}
+          .intake-formats{flex-direction:column !important}
+          .hero-stat-bar{grid-template-columns:1fr 1fr !important}
+          .section-header h1{font-size:clamp(22px,6vw,32px) !important}
+          .checklist-grid{grid-template-columns:1fr !important}
+          .tool-grid{grid-template-columns:1fr 1fr !important}
+          .mood-layout{grid-template-columns:1fr !important}
+          .quick-actions{flex-direction:column !important}
+          .portal-tabs-mobile{display:flex !important}
+        }
+        @media(min-width:769px){
+          .mobile-bottom-nav{display:none !important}
+          .mobile-menu-overlay{display:none !important}
+          .portal-tabs-mobile{display:none !important}
+        }
+        @media(max-width:480px){
+          .hero-stat-bar{grid-template-columns:1fr 1fr !important}
+          .hero-stat-bar>div{padding:14px 10px !important}
+          .tool-grid{grid-template-columns:1fr !important}
+        }
       `}</style>
 
       {/* TOAST */}
       {toast && <div style={{ position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)", zIndex: 9999, background: C.teal, color: C.cream, padding: "12px 28px", borderRadius: 8, fontSize: 13, fontWeight: 600, letterSpacing: 0.5, boxShadow: "0 8px 32px rgba(27,58,75,0.3)", animation: "fadeUp 0.4s ease" }}>{toast}</div>}
 
-      <div style={{ display: "flex", minHeight: "100vh" }}>
+      <div style={{ display: "flex", minHeight: "100vh", flexDirection: mobile ? "column" : "row" }}>
 
-        {/* ═══ SIDEBAR — matches website nav aesthetic ═══ */}
-        <aside style={{ width: sidebarOpen ? 260 : 64, minWidth: sidebarOpen ? 260 : 64, background: C.teal, display: "flex", flexDirection: "column", transition: "all 0.35s cubic-bezier(0.16,1,0.3,1)", overflow: "hidden", position: "relative" }}>
+        {/* ═══ MOBILE TOP HEADER ═══ */}
+        {mobile && (
+          <div style={{ background: C.teal, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 22 }}>🧠</span>
+              <div className="pf" style={{ color: C.cream, fontSize: 16, fontWeight: 600, letterSpacing: 1 }}>THE MIND STUDIO</div>
+            </div>
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background: `${C.cream}15`, border: "none", borderRadius: 8, padding: "8px 12px", color: C.cream, fontSize: 18, cursor: "pointer" }}>
+              {mobileMenuOpen ? "✕" : "☰"}
+            </button>
+          </div>
+        )}
+
+        {/* ═══ MOBILE FULL MENU OVERLAY ═══ */}
+        {mobile && mobileMenuOpen && (
+          <div className="mobile-menu-overlay" style={{ position: "fixed", inset: 0, top: 52, background: C.teal, zIndex: 45, overflowY: "auto", animation: "slideUp 0.3s ease", paddingBottom: 100 }}>
+            {/* Portal tabs */}
+            <div style={{ display: "flex", gap: 4, padding: "12px 16px", borderBottom: `1px solid ${C.cream}10` }}>
+              {Object.entries(PORTALS).map(([k, v]) => (
+                <button key={k} onClick={() => switchPortal(k)} style={{ flex: 1, padding: "10px 8px", background: portal === k ? `${C.cream}15` : "transparent", border: `1px solid ${portal === k ? `${C.cream}25` : "transparent"}`, borderRadius: 8, color: portal === k ? C.cream : `${C.cream}50`, fontSize: 12, fontWeight: 700, letterSpacing: 0.5, cursor: "pointer", fontFamily: "inherit" }}>{v.icon} {v.label.split(" ")[0]}</button>
+              ))}
+            </div>
+            {/* Section list */}
+            <div style={{ padding: "8px 0" }}>
+              {P.sections.map(s => (
+                <button key={s.id} onClick={() => go(s.id)} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "14px 24px", background: section === s.id ? `${C.cream}08` : "transparent", border: "none", borderLeft: section === s.id ? `3px solid ${C.cream}` : "3px solid transparent", color: section === s.id ? C.cream : `${C.cream}60`, fontSize: 15, cursor: "pointer", fontFamily: "inherit", textAlign: "left", minHeight: 48 }}>
+                  <span style={{ fontSize: 18 }}>{s.icon}</span>
+                  <span>{s.label}</span>
+                </button>
+              ))}
+            </div>
+            {/* Crisis footer */}
+            <div style={{ padding: "16px 24px", borderTop: `1px solid ${C.cream}10` }}>
+              <div style={{ color: `${C.cream}40`, fontSize: 11 }}>🔒 HIPAA Protected · Crisis: 988 Lifeline</div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ DESKTOP SIDEBAR ═══ */}
+        <aside className="desktop-sidebar" style={{ width: sidebarOpen ? 260 : 64, minWidth: sidebarOpen ? 260 : 64, background: C.teal, display: mobile ? "none" : "flex", flexDirection: "column", transition: "all 0.35s cubic-bezier(0.16,1,0.3,1)", overflow: "hidden", position: "relative" }}>
 
           {/* Botanical decoration */}
           <div style={{ position: "absolute", bottom: 0, right: 0, opacity: 0.04 }}>
@@ -218,8 +303,8 @@ export default function MindStudioPortal() {
         {/* ═══ MAIN CONTENT AREA ═══ */}
         <main key={animKey} className="anim-up sb" style={{ flex: 1, overflowY: "auto", background: C.sage, position: "relative" }}>
 
-          {/* TOP BAR */}
-          <div style={{ padding: "16px 40px", background: C.white, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
+          {/* TOP BAR - hidden on mobile (replaced by mobile header) */}
+          {!mobile && <div className="top-bar" style={{ padding: "16px 40px", background: C.white, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
             <div style={{ color: C.body, fontSize: 13, fontWeight: 700, letterSpacing: 0.5 }}>
               {P.sections.find(s => s.id === section)?.icon} {P.sections.find(s => s.id === section)?.label}
             </div>
@@ -227,9 +312,9 @@ export default function MindStudioPortal() {
               <span style={{ color: C.bodyLight, fontSize: 11 }}>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</span>
               <div style={{ width: 32, height: 32, borderRadius: "50%", background: C.sageLt, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>👤</div>
             </div>
-          </div>
+          </div>}
 
-          <div style={{ padding: "32px 40px 60px", maxWidth: 960, margin: "0 auto" }}>
+          <div className="main-content" style={{ padding: mobile ? "20px 16px 100px" : "32px 40px 60px", maxWidth: 960, margin: "0 auto" }}>
             {/* CLIENT PORTAL */}
             {section === "welcome" && <WelcomeSection go={go} />}
             {section === "intake" && <IntakeSection notify={notify} />}
@@ -253,6 +338,23 @@ export default function MindStudioPortal() {
             {section === "b_reports" && <BReportsSection />}
           </div>
         </main>
+
+        {/* ═══ MOBILE BOTTOM NAV BAR ═══ */}
+        {mobile && (
+          <nav className="mobile-bottom-nav" style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: C.white, borderTop: `1px solid ${C.border}`, display: "flex", justifyContent: "space-around", alignItems: "center", padding: "6px 0", paddingBottom: "max(6px, env(safe-area-inset-bottom))", zIndex: 40, boxShadow: "0 -2px 12px rgba(0,0,0,0.06)" }}>
+            {P.sections.slice(0, 5).map(s => (
+              <button key={s.id} onClick={() => go(s.id)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: "6px 8px", minWidth: 56, minHeight: 44 }}>
+                <span style={{ fontSize: 20, opacity: section === s.id ? 1 : 0.4 }}>{s.icon}</span>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: section === s.id ? C.teal : C.bodyLight }}>{s.label}</span>
+                {section === s.id && <div style={{ width: 20, height: 2, background: C.teal, borderRadius: 1, marginTop: 1 }} />}
+              </button>
+            ))}
+            <button onClick={() => setMobileMenuOpen(true)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: "6px 8px", minWidth: 56, minHeight: 44 }}>
+              <span style={{ fontSize: 20, opacity: 0.4 }}>•••</span>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: C.bodyLight }}>More</span>
+            </button>
+          </nav>
+        )}
       </div>
     </>
   );
@@ -326,7 +428,7 @@ function WelcomeSection({ go }) {
       <SH title="Heal Your Mind, Transform Your Life" sub="Welcome to your private, confidential healing space. Everything here is designed to support your journey — at your pace, on your terms." />
 
       {/* HERO STAT BAR — matches website's stat section */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, background: C.teal, borderRadius: 12, overflow: "hidden", marginBottom: 28 }} className="anim-scale">
+      <div className="hero-stat-bar" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, background: C.teal, borderRadius: 12, overflow: "hidden", marginBottom: 28 }} className="anim-scale hero-stat-bar">
         {[
           { val: "100%", label: "Confidential" },
           { val: "24/7", label: "Crisis Support" },
@@ -352,7 +454,7 @@ function WelcomeSection({ go }) {
         <div style={{ width: "100%", height: 4, background: C.sageLt, borderRadius: 2, marginBottom: 16 }}>
           <div style={{ width: "0%", height: "100%", background: C.teal, borderRadius: 2, transition: "width 0.6s ease" }} />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+        <div className="checklist-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
           {steps.map((s, i) => (
             <button key={i} onClick={() => go(s.action)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: C.sageLt, border: `1px solid ${C.border}`, borderRadius: 8, cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
               <div style={{ width: 22, height: 22, borderRadius: "50%", border: `2px solid ${s.done ? C.success : C.sageAccent}`, background: s.done ? C.success : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -365,7 +467,7 @@ function WelcomeSection({ go }) {
       </WCard>
 
       {/* SECTION GRID — website card style */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }}>
+      <div className="card-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }}>
         {[
           { icon: "📋", title: "Complete Intake", desc: "Tell us about yourself so we can match you with the right therapist.", action: "intake" },
           { icon: "📅", title: "Your Sessions", desc: "Book appointments, join virtual sessions, and track progress.", action: "sessions" },
@@ -423,14 +525,14 @@ function IntakeSection({ notify }) {
       <ProgressSteps current={step} total={4} />
 
       {step === 1 && <div className="anim-slide">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2 }}>
           <Input label="First Name" value={f.first} onChange={e => u("first", e.target.value)} required />
           <Input label="Last Name" value={f.last} onChange={e => u("last", e.target.value)} required />
         </div>
         <Input label="Email" value={f.email} onChange={e => u("email", e.target.value)} type="email" required />
         <Input label="Phone" value={f.phone} onChange={e => u("phone", e.target.value)} type="tel" required />
         <Input label="Date of Birth" value={f.dob} onChange={e => u("dob", e.target.value)} type="date" required />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2 }}>
           <Input label="State" value={f.state} onChange={e => u("state", e.target.value)} required />
           <Input label="City" value={f.city} onChange={e => u("city", e.target.value)} />
         </div>
@@ -457,7 +559,7 @@ function IntakeSection({ notify }) {
         <Input label="What brings you to therapy?" value={f.reason} onChange={e => u("reason", e.target.value)} rows={4} placeholder="Share in your own words — there are no wrong answers." required />
         <Input label="Goals for therapy" value={f.goals} onChange={e => u("goals", e.target.value)} rows={3} placeholder="What would progress look like for you?" />
         <Input label="Current medications" value={f.meds} onChange={e => u("meds", e.target.value)} placeholder="List any current medications or write N/A" />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2 }}>
           <Input label="Emergency Contact Name" value={f.ec_name} onChange={e => u("ec_name", e.target.value)} />
           <Input label="Emergency Contact Phone" value={f.ec_phone} onChange={e => u("ec_phone", e.target.value)} type="tel" />
         </div>
@@ -532,7 +634,7 @@ function ToolsSection() {
     <div>
       <SH title="Daily Tools & Check-In" sub="Consistent tracking helps your therapist personalize your care. Your data is encrypted and only visible to your care team." />
       <HipaaNotice />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }} className="mood-layout">
         {/* MOOD LOG */}
         <WCard>
           {logged ? (
@@ -584,7 +686,7 @@ function ToolsSection() {
 
       {/* WELLNESS TOOLS GRID */}
       <div className="pf" style={{ color: C.teal, fontSize: 20, fontStyle: "italic", fontWeight: 600, marginBottom: 14 }}>Wellness Toolbox</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }} className="tool-grid">
         {[
           { icon: "🌅", title: "Morning Affirmation", desc: "Start your day with intention and self-compassion" },
           { icon: "🌊", title: "4-7-8 Breathing", desc: "Activate your parasympathetic nervous system" },
@@ -632,7 +734,7 @@ function ResourcesSection() {
 function CommunitySection() {
   return (
     <div><SH title="Community & Events" sub="Safe, moderated spaces for connection and support. All participation is confidential." />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }} className="card-grid-2">
         {[
           { icon: "🗣️", title: "Discussion Groups", desc: "Therapist-led virtual groups: anxiety, grief, identity, perinatal support, and more." },
           { icon: "❓", title: "Ask a Therapist", desc: "Submit anonymous questions answered by licensed professionals." },
@@ -649,7 +751,7 @@ function BillingSection() {
   return (
     <div><SH title="Billing & Membership" sub="Manage your insurance, view session history, and handle payments." />
       <HipaaNotice />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }} className="card-grid-2">
         <StatCard label="Current Plan" value="—" sub="Complete intake to verify" icon="💳" />
         <StatCard label="Sessions" value="0" sub="Total completed" icon="📅" />
       </div>
@@ -701,7 +803,7 @@ function TSupportSection({ notify }) {
 function TCompSection() {
   const d = [{ m: "Jan", rev: 0 }, { m: "Feb", rev: 0 }, { m: "Mar", rev: 0 }];
   return (<div><SH title="Compensation & Billing" sub="Submit session logs, view pay schedule, and track earnings." />
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 16 }}><StatCard label="This Month" value="$0" icon="💰" /><StatCard label="Sessions" value="0" icon="📋" /><StatCard label="Next Payout" value="—" icon="📅" /></div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 16 }} className="stat-grid-3"><StatCard label="This Month" value="$0" icon="💰" /><StatCard label="Sessions" value="0" icon="📋" /><StatCard label="Next Payout" value="—" icon="📅" /></div>
     <WCard>
       <div className="pf" style={{ color: C.teal, fontSize: 15, fontStyle: "italic", fontWeight: 600, marginBottom: 12 }}>Earnings Trend</div>
       <ResponsiveContainer width="100%" height={160}><BarChart data={d}><XAxis dataKey="m" tick={{ fill: C.bodyLight, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: C.bodyLight, fontSize: 9 }} axisLine={false} tickLine={false} /><Bar dataKey="rev" fill={C.sageAccent} radius={[6, 6, 0, 0]} /></BarChart></ResponsiveContainer>
@@ -711,7 +813,7 @@ function TCompSection() {
 // ═══ BOH OPS PORTAL SECTIONS ═══
 function BOverviewSection() {
   return (<div><SH title="Operations Center" sub="The engine behind The Mind Studio. Team metrics, org structure, and communication SOPs." />
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 16 }}><StatCard label="Active Clients" value="0" icon="👤" /><StatCard label="Therapists" value="0" icon="🩺" /><StatCard label="Pending Intake" value="0" icon="📋" /><StatCard label="Claims/Month" value="0" icon="💳" /></div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 16 }} className="stat-grid-4"><StatCard label="Active Clients" value="0" icon="👤" /><StatCard label="Therapists" value="0" icon="🩺" /><StatCard label="Pending Intake" value="0" icon="📋" /><StatCard label="Claims/Month" value="0" icon="💳" /></div>
     <WCard>
       <div className="pf" style={{ color: C.teal, fontSize: 16, fontStyle: "italic", fontWeight: 600, marginBottom: 12 }}>Team Roles</div>
       {["Concierge", "Scheduler", "Billing Assistant", "VA / Admin", "Intake Specialist"].map((r, i) => (<div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderBottom: `1px solid ${C.sageLt}` }}><div style={{ width: 10, height: 10, borderRadius: "50%", background: C.sageAccent }} /><span style={{ color: C.body, fontSize: 14 }}>{r}</span></div>))}
@@ -752,7 +854,7 @@ function BTrainingSection() {
 function BReportsSection() {
   const d = [{ w: "W1", clients: 0, claims: 0 }, { w: "W2", clients: 0, claims: 0 }, { w: "W3", clients: 0, claims: 0 }, { w: "W4", clients: 0, claims: 0 }];
   return (<div><SH title="Reports & Metrics" sub="Client conversion, therapist utilization, lead sources, and claims performance." />
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 16 }}><StatCard label="Conversion" value="0%" /><StatCard label="Therapist Util." value="0%" /><StatCard label="Avg Intake" value="—" /><StatCard label="Claims Ratio" value="0/0" /></div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 16 }} className="stat-grid-4"><StatCard label="Conversion" value="0%" /><StatCard label="Therapist Util." value="0%" /><StatCard label="Avg Intake" value="—" /><StatCard label="Claims Ratio" value="0/0" /></div>
     <WCard>
       <div className="pf" style={{ color: C.teal, fontSize: 15, fontStyle: "italic", fontWeight: 600, marginBottom: 12 }}>Weekly Performance</div>
       <ResponsiveContainer width="100%" height={180}><LineChart data={d}><XAxis dataKey="w" tick={{ fill: C.bodyLight, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: C.bodyLight, fontSize: 9 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 11 }} /><Line type="monotone" dataKey="clients" stroke={C.teal} strokeWidth={2.5} dot={{ fill: C.teal, r: 4 }} /><Line type="monotone" dataKey="claims" stroke={C.sageAccent} strokeWidth={1.5} strokeDasharray="4 4" /></LineChart></ResponsiveContainer>
