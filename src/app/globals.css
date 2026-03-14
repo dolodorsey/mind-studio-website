@@ -2,9 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap');
 
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-body { background: #0A0A0A; color: #F5F0E8; font-family: 'DM Sans', sans-serif; }
-::selection { background: #C9A84C30; color: #C9A84C; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { scroll-behavior:smooth; height:100%; overflow:hidden; }
+body { 
+  background:#D5E8D4; color:#2C3E50; font-family:'Lato',sans-serif;
+  height:100%; overflow:hidden;
+  overscroll-behavior:none;
+  -webkit-overflow-scrolling:touch;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  position:fixed; width:100%; /* prevents bounce scroll on iOS */
+}
+::selection { background:#1B3A4B20; color:#1B3A4B; }
+input,textarea,select { font-size:16px !important; /* prevents iOS zoom */ }
+::-webkit-scrollbar { width:0; display:none; }
+* { scrollbar-width:none; }
