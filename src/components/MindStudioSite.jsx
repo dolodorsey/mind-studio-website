@@ -372,7 +372,7 @@ function WelcomeSection({ go }) {
       <SH title="Heal Your Mind, Transform Your Life" sub="Welcome to your private, confidential healing space. Everything here is designed to support your journey — at your pace, on your terms." />
 
       {/* HERO STAT BAR — matches website's stat section */}
-      <div className="hero-stat-bar" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, background: C.teal, borderRadius: 12, overflow: "hidden", marginBottom: 28 }} className="anim-scale hero-stat-bar">
+      <div className="anim-scale hero-stat-bar" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, background: C.teal, borderRadius: 12, overflow: "hidden", marginBottom: 28 }}>
         {[
           { val: "100%", label: "Confidential" },
           { val: "24/7", label: "Crisis Support" },
@@ -469,14 +469,14 @@ function IntakeSection({ notify }) {
       <ProgressSteps current={step} total={4} />
 
       {step === 1 && <div className="anim-slide">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2">
           <Input label="First Name" value={f.first} onChange={e => u("first", e.target.value)} required />
           <Input label="Last Name" value={f.last} onChange={e => u("last", e.target.value)} required />
         </div>
         <Input label="Email" value={f.email} onChange={e => u("email", e.target.value)} type="email" required />
         <Input label="Phone" value={f.phone} onChange={e => u("phone", e.target.value)} type="tel" required />
         <Input label="Date of Birth" value={f.dob} onChange={e => u("dob", e.target.value)} type="date" required />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2">
           <Input label="State" value={f.state} onChange={e => u("state", e.target.value)} required />
           <Input label="City" value={f.city} onChange={e => u("city", e.target.value)} />
         </div>
@@ -503,7 +503,7 @@ function IntakeSection({ notify }) {
         <Input label="What brings you to therapy?" value={f.reason} onChange={e => u("reason", e.target.value)} rows={4} placeholder="Share in your own words — there are no wrong answers." required />
         <Input label="Goals for therapy" value={f.goals} onChange={e => u("goals", e.target.value)} rows={3} placeholder="What would progress look like for you?" />
         <Input label="Current medications" value={f.meds} onChange={e => u("meds", e.target.value)} placeholder="List any current medications or write N/A" />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px"}} className="form-grid-2">
           <Input label="Emergency Contact Name" value={f.ec_name} onChange={e => u("ec_name", e.target.value)} />
           <Input label="Emergency Contact Phone" value={f.ec_phone} onChange={e => u("ec_phone", e.target.value)} type="tel" />
         </div>
