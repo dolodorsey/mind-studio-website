@@ -210,7 +210,7 @@ export default function MindStudioPortal() {
         {/* ═══ APP HEADER BAR — like a native app ═══ */}
         <header style={{ background:C.teal, padding:`calc(${SAT} + 8px) 16px 10px`, display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0, zIndex:20 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <span style={{ fontSize:22 }}>🧠</span>
+            <img src="/images/mind-studio-logo-transparent.png" alt="" style={{ width:32, height:32, objectFit:"contain" }} />
             <div>
               <div className="pf" style={{ color:C.cream, fontSize:15, fontWeight:600, letterSpacing:1.5, lineHeight:1 }}>THE MIND STUDIO</div>
               <div style={{ color:`${C.cream}50`, fontSize:9, letterSpacing:2, textTransform:"uppercase" }}>{P.label}</div>
@@ -584,7 +584,7 @@ function ToolsSection() {
         <WCard>
           {logged ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <span style={{ fontSize: 56 }}>🧠</span>
+              <img src="/images/mind-studio-logo-transparent.png" alt="" style={{ width: 72, height: 72, objectFit: "contain" }} />
               <div className="pf" style={{ color: C.teal, fontSize: 24, fontStyle: "italic", marginTop: 12 }}>Check-In Complete</div>
               <p style={{ color: C.bodyLight, fontSize: 12, marginTop: 4 }}>Consistency builds clarity. See you tomorrow.</p>
             </div>
