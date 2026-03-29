@@ -1,4 +1,4 @@
 'use client'
 import dynamic from 'next/dynamic'
-const MindStudioSite = dynamic(() => import('@/components/MindStudioSite'), { ssr: false })
-export default function Home() { return <MindStudioSite /> }
+const MindStudioLanding = dynamic(() => import('@/components/MindStudioLanding'), { ssr: false })
+export default function Home() { return <MindStudioLanding /> }
