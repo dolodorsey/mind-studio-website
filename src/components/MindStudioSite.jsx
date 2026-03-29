@@ -37,6 +37,7 @@ async function sbGet(p) { try { const r = await fetch(`${SB}/rest/v1/${p}`, { he
 async function sbPost(p, b) { try { await fetch(`${SB}/rest/v1/${p}`, { method: "POST", headers: { ...H, Prefer: "return=minimal" }, body: JSON.stringify(b) }); return true; } catch { return false; } }
 
 // ═══ DESIGN TOKENS — from the live website ═══
+const MIND_LOGO = "/images/mind-studio-logo.png";
 const C = {
   teal: "#1B3A4B",       // primary — nav, buttons, hero
   tealLight: "#234E64",  // hover state
